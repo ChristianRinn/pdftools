@@ -6,12 +6,13 @@ pdftools
 for fast and painless pdf manipulation via commandline. It is based on the
 PyPdf2 package.
 
-[![Code Issues](http://www.quantifiedcode.com/api/v1/project/c09bff5bdc1f466b92361ce25fead1d5/badge.svg)](http://www.quantifiedcode.com/app/project/c09bff5bdc1f466b92361ce25fead1d5)
+[![Build Status](https://travis-ci.org/MrLeeh/pdftools.svg?branch=master)](https://travis-ci.org/MrLeeh/pdftools) [![Code Issues](http://www.quantifiedcode.com/api/v1/project/c09bff5bdc1f466b92361ce25fead1d5/badge.svg)](http://www.quantifiedcode.com/app/project/c09bff5bdc1f466b92361ce25fead1d5)
 
 ## Features
 
 * add, insert, remove and rotate pages
 * split PDF files in multiple documents
+* copy specific pages in a new document
 * merge or zip PDF files into one document
 
 ## Usage
@@ -45,6 +46,32 @@ optional arguments:
   -o OUTPUT, --output OUTPUT
                         name of the output file, if None the destinationfile
                         will be overwritten
+```
+
+### pdfcopy.py
+
+Copy specific pages of a PDF file in a new file.
+
+```
+usage: pdfcopy.py [-h] [--version] [-o OUTPUT] [-p PAGES [PAGES ...]] [-y]
+                  input
+
+Copy specific pages of a PDF file in a new file.
+
+positional arguments:
+  input                 input file containing the source pages
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  -o OUTPUT, --output OUTPUT
+                        filename of the output file
+  -p PAGES [PAGES ...], --pages PAGES [PAGES ...]
+                        list of pages to copy in the new file. Examples: "5 8
+                        10": Pages 5, 8, 10; "1-9": Pages 1 to 9; "5-": Pages
+                        from 5 to last page; "-9": Pages from beginning to 9
+  -y                    yes to all
+
 ```
 
 ### pdfinsert.py
@@ -182,6 +209,11 @@ Zip the pages of two input files in one output file. This is useful when
 dealing with scanned documents where even pages are in one docuemnt and
 odd pages in the other.
 
+To merge a multiple page document which was scanned with a non-duplex-scanner
+one can use the *--revert* option. In this case one gets e.g. one pdf with pages
+1,3 and 5 and another pdf with the pages 6,4 and 2. In order to merge/zip them
+correctly the second pdf needs to be reversed.
+
 ```
 usage: pdfzip.py [-h] -o OUTPUT [-d] input1 input2
 
@@ -196,4 +228,5 @@ optional arguments:
 -o OUTPUT, --output OUTPUT
 filename of the output file
 -d, --delete          delete input files after merge
+-r, --revert          revert the pages of second input file
 ```

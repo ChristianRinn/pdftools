@@ -1,6 +1,6 @@
 import os
 from tempfile import NamedTemporaryFile
-from shutil import move, copy
+from shutil import move
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from pdftools.parseutil import parse_rangearg, limit
 
@@ -68,7 +68,7 @@ def pdf_rotate(input: str, counter_clockwise: bool=False, pages: [str]=None,
         source_pages = [reader.getPage(i) for i in pages]
 
     # rotate pages and add to writer
-    for i, page in enumerate(reader.pages):
+    for i, page in enumerate(source_pages):
         if pages is None or i in pages:
             if counter_clockwise:
                 writer.addPage(page.rotateCounterClockwise(90))
@@ -98,6 +98,37 @@ def pdf_rotate(input: str, counter_clockwise: bool=False, pages: [str]=None,
             move(outfile.name, input)
         else:
             os.remove(outfile.name)
+
+
+def pdf_copy(input: str, output: str, pages: [int], yes_to_all=False):
+    """
+    Copy pages from the input file in a new output file.
+    :param input: name of the input pdf file
+    :param output: name of the output pdf file
+    :param pages: list containing the page numbers to copy in the new file
+
+    """
+    if not os.path.isfile(input):
+        print("Error. The file '%s' does not exist." % input)
+        return
+    if (os.path.isfile(output)
+            and not yes_to_all
+            and not overwrite_dlg(output)):
+        return
+
+    with open(input, 'rb') as inputfile:
+        reader = PdfFileReader(inputfile)
+        outputfile = open(output, "wb")
+        writer = PdfFileWriter()
+        if pages is None:
+            pages = range(len(reader.pages))
+        else:
+            pages = parse_rangearg(pages, len(reader.pages))
+        for pagenr in sorted(pages):
+            page = reader.getPage(pagenr)
+            writer.addPage(page)
+            writer.write(outputfile)
+        outputfile.close()
 
 
 def pdf_split(input: str, output: str, stepsize: int=1, sequence: [int]=None):
@@ -147,7 +178,8 @@ def pdf_split(input: str, output: str, stepsize: int=1, sequence: [int]=None):
             outputfile.close()
 
 
-def pdf_zip(input1: str, input2: str, output: str, delete: bool=False, revert: bool=False):
+def pdf_zip(input1: str, input2: str, output: str, delete: bool=False,
+            revert: bool=False):
     """
     Zip pages of input1 and input2 in one output file. Useful for putting
     even and odd pages together in one document.
